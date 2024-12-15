@@ -9,6 +9,7 @@
 ;; Data from https://www.kaggle.com/datasets/nicholasliusontag/nfl-contract-and-draft-data/data
 
 ;; Map teams that moved or rebranded themselves
+{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def team-moves
   {"SDG" "LAC" 
    "STL" "LAR"
@@ -29,6 +30,7 @@
 
 ;; How does pay correlate to draft position?
 
+{:nextjournal.clerk/visibility {:code :show :result :show}}
 (clerk/plotly
   {:data (for [position (keys by-position)
                :let [data (by-position position)]]
@@ -57,6 +59,7 @@
             :type "box" })
    :layout {:showlegend false}})
 
+{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def team-mapping
   {"Tennessee Titans" "TEN", "Pittsburgh Steelers" "PIT", "Tampa Bay Buccaneers" "TAM", "Cincinnati Bengals" "CIN", "Washington Football Team" "WAS", "Washington Redskins" "WAS",
    "New York Giants" "NYG", "Buffalo Bills" "BUF", "Baltimore Ravens" "BAL", "Minnesota Vikings" "MIN", "Indianapolis Colts" "IND", "San Diego Chargers" "SDG",
@@ -117,6 +120,7 @@
      :fs (:f-statistic model)}))
 
 ;; What do the r squared values look like?
+{:nextjournal.clerk/visibility {:code :show :result :show}}
 (clerk/plotly {:data [{:y (map :rs evaluations)
                        :x (map :years-back evaluations)}]})
 
@@ -124,12 +128,14 @@
 
 ;; What does that data look like?
 
+^{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def ds (make-data-set 5))
 
 (clerk/code (tc/info ds))
 
 ;; Lets build the model
 
+^{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def m (model ds))
 
 (clerk/code 
@@ -170,6 +176,7 @@
       (tc/select-columns (conj positions :win_loss_perc)))))
 
 ;; Try models going back from 1 to 10 years
+^{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def multi-year-evaluations
   (for [years (range 2 15)
         :let [ds (multi-year-dataset years)
@@ -184,10 +191,12 @@
 
 ;; Looking at the draft positions for the past 12 years explains about 5% of the win percentage. Lets go with that
 
+^{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def multi-year-ds (multi-year-dataset 12))
 
 (clerk/code (tc/info multi-year-ds))
 
+^{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def multi-year-model (model multi-year-ds))
 
 (clerk/code 
