@@ -1,7 +1,7 @@
-^{:nextjournal.clerk/visibility {:code :hide}}
 (ns nfl 
   (:require [tablecloth.api :as tc]
             [fastmath.ml.regression :as reg]
+            [fastmath.vector :as fmvec]
             [nextjournal.clerk :as clerk]
             [clojure.instant :as instant]
             [scicloj.kindly.v4.kind :as kind]))
@@ -102,16 +102,16 @@
 
 ;; Build a linear model
 (defn model
-  [ds options]
+  [ds]
   (reg/lm (:win_loss_perc ds)
           (tc/rows (tc/drop-columns ds [:win_loss_perc]))
-          (merge {:names positions} options)))
+          {:names positions}))
 
 ;; Try models going back from 1 to 10 years
 (def evaluations
   (for [years (range 1 10)
         :let [ds (make-data-set years)
-              model (model ds {})]]
+              model (model ds)]]
     {:years-back years
      :rs (:r-squared model)
      :fs (:f-statistic model)}))
@@ -122,18 +122,85 @@
 
 ;; Pretty bad but 5 years seems to be best
 
-(def m (model (make-data-set 5) {}))
+;; What does that data look like?
+
+(def ds (make-data-set 5))
+
+(clerk/code (tc/info ds))
+
+;; Lets build the model
+
+(def m (model ds))
 
 (clerk/code 
   (-> m
     println
     with-out-str))
 
+;; The model's F statistic is not statistically signficant, so this is a pretty bad model
 ;; The only position that is signficant at p <= 0.05 is OL
 
 (clerk/plotly 
   {:data
    [(let [coefficients (rest (:coefficients m))]
+      {:y (map :estimate coefficients)
+       :error_y {:type 'data'
+                 :array (for [c coefficients
+                              :let [estimate (:estimate c) interval (:confidence-interval c)]]
+                          (- (first interval) estimate))
+                 :visible true}
+       :x (rest (:names m))
+       :type "scatter"
+       :mode "markers"})]})
+
+;; What if we look at multiple years
+(defn window
+  [years-back]
+  (->
+    (apply tc/concat (for [i (range 1 years-back)]
+                       (tc/map-columns draft-data :year [:season] #(+ % i))))
+    (tc/group-by [:year :team])
+    (tc/aggregate-columns positions #(reduce + %))))
+
+(defn multi-year-dataset
+  [years-back]
+  (let [drafts (window years-back)]
+    (-> 
+      (tc/inner-join drafts team-data [:team :year])
+      (tc/select-columns (conj positions :win_loss_perc)))))
+
+;; Try models going back from 1 to 10 years
+(def multi-year-evaluations
+  (for [years (range 2 15)
+        :let [ds (multi-year-dataset years)
+              model (model ds)]]
+    {:years-back years
+     :rs (:r-squared model)
+     :fs (:f-statistic model)}))
+
+;; What do the r squared values look like?
+(clerk/plotly {:data [{:y (map :rs multi-year-evaluations)
+                       :x (map :years-back multi-year-evaluations)}]})
+
+;; Looking at the draft positions for the past 12 years explains about 5% of the win percentage. Lets go with that
+
+(def multi-year-ds (multi-year-dataset 12))
+
+(clerk/code (tc/info multi-year-ds))
+
+(def multi-year-model (model multi-year-ds))
+
+(clerk/code 
+  (-> multi-year-model
+    println
+    with-out-str))
+
+;; Now line backers are also positive and statistically significant at p <= 0.05. The Offensive Linemen again have the highest coefficient and are significant at p <= 0.0001
+;; Also the model now has a significant F statistic.
+
+(clerk/plotly 
+  {:data
+   [(let [coefficients (rest (:coefficients multi-year-model))]
       {:y (map :estimate coefficients)
        :error_y {:type 'data'
                  :array (for [c coefficients
