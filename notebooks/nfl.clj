@@ -91,8 +91,8 @@
       (tc/pivot->wider :category "summary" {:drop-missing? false})
       (tc/replace-missing :all :value 0))))
 
-;; There aren't enough special teams draftees to work with
-(def positions ["QB" "RB" "DL" "LB" "DB" "OL" "TE" "WR"])
+;; There aren't enough kick returners or long snappers to work with
+(def positions ["QB" "RB" "DL" "LB" "DB" "OL" "TE" "WR" "K" "P"])
 
 ;; Create a dataset to get the win loss data from a given number of years back
 (defn make-data-set
@@ -145,7 +145,7 @@
     with-out-str))
 
 ;; The model's F statistic is not statistically signficant, so this is a pretty bad model
-;; The only position that is signficant at p <= 0.05 is OL
+;; The only position that is signficant at p <= 0.05 is OL. Kickers have a higher coefficient but there aren't enough of them to be statistically significant.
 
 (clerk/plotly 
   {:data
@@ -205,7 +205,7 @@
     println
     with-out-str))
 
-;; Now line backers are also positive and statistically significant at p <= 0.05. The Offensive Linemen again have the highest coefficient and are significant at p <= 0.0001
+;; Now line backers and kickers are also positive and statistically significant at p <= 0.05. Kickers have the highest coefficient but their standard error remains fairly large. The Offensive Linemen have the second highest coefficient and are significant at p <= 0.0001.
 ;; Also the model now has a significant F statistic.
 
 (clerk/plotly 
