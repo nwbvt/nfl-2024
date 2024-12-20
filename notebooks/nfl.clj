@@ -2,6 +2,7 @@
   (:require [tablecloth.api :as tc]
             [fastmath.ml.regression :as reg]
             [fastmath.vector :as fmvec]
+            [fastmath.stats :as stats]
             [nextjournal.clerk :as clerk]
             [clojure.instant :as instant]
             [scicloj.kindly.v4.kind :as kind]))
@@ -219,3 +220,12 @@
        :x (rest (:names m))
        :type "scatter"
        :mode "markers"})]})
+
+;; Lets also look at the correlations
+
+(clerk/plotly
+  {:data [{:x positions
+           :y (for [p positions] (stats/correlation (:win_loss_perc multi-year-ds) (multi-year-ds p)))
+           :type "bar"
+           }]
+   })
