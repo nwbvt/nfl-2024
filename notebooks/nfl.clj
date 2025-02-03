@@ -74,7 +74,8 @@
   (-> "team_stats_2003_2023.csv"
       (tc/dataset {:key-fn keyword})
       (tc/map-columns :team [:team] team-mapping)
-      (tc/map-columns :team [:team] #(or (team-moves %) %))))
+      (tc/map-columns :team [:team] #(or (team-moves %) %))
+      (tc/map-columns :name [:team :year] (fn [team year] (str team "-" year)))))
 
 ;; More complete draft data
 (def raw-draft-data
@@ -229,3 +230,14 @@
            :type "bar"
            }]
    })
+
+;; How does the fitted data relate to the actuals?
+(clerk/plotly
+  {:data [{:x (seq (:win_loss_perc multi-year-ds))
+           :y (:fitted multi-year-model)
+           :type "scatter"
+           :mode "markers"
+           :text (seq (:name team-data))}]
+   :layout {:title {:text "Predicted vs Actual"}
+            :xaxis {:title {:text "Win Loss Percentage"}}
+            :yaxis {:title {:text "Predicted"}}}})
