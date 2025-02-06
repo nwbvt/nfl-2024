@@ -159,7 +159,8 @@
                  :visible true}
        :x (rest (:names m))
        :type "scatter"
-       :mode "markers"})]})
+       :mode "markers"})]
+   :layout {:title {:text "Model Coefficients"}}})
 
 ;; What if we look at multiple years
 (defn window
@@ -220,7 +221,8 @@
                  :visible true}
        :x (rest (:names m))
        :type "scatter"
-       :mode "markers"})]})
+       :mode "markers"})]
+   :layout {:title {:text "Model Coefficients"}}})
 
 ;; Lets also look at the correlations
 
