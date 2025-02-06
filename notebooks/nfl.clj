@@ -191,7 +191,7 @@
 (clerk/plotly {:data [{:y (map :rs multi-year-evaluations)
                        :x (map :years-back multi-year-evaluations)}]})
 
-;; Looking at the draft positions for the past 12 years explains about 5% of the win percentage. Lets go with that
+;; Looking at the draft positions for the past 12 years explains about 6% of the win percentage. Lets go with that
 
 ^{:nextjournal.clerk/visibility {:code :show :result :hide}}
 (def multi-year-ds (multi-year-dataset 12))
