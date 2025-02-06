@@ -77,7 +77,7 @@
       (tc/map-columns :team [:team] #(or (team-moves %) %))
       (tc/map-columns :name [:team :year] (fn [team year] (str team "-" year)))))
 
-;; More complete draft data
+;; More complete draft data: https://www.kaggle.com/datasets/dubradave/nfl-draft-history-1990-present
 (def raw-draft-data
   (-> "NFLDraftHistory.csv"
       (tc/dataset {:key-fn keyword})
